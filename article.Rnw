@@ -1,0 +1,100 @@
+\documentclass{article}
+\usepackage{natbib}
+
+<<echo=FALSE>>=
+packages<-c('dplyr','gutenbergr','stringr','tidytext','tm','wordcloud')
+knitr::write_bib(packages,file='article.bib')
+@
+
+
+\begin{document}
+
+
+
+\title{Using R to create a Wordcloud from text in an ebook}
+\author{Judy Minichelli}
+\maketitle
+
+\begin{abstract}
+The article gives instructions on how to download text from an ebook and create a 
+wordcloud in R.  A wordclouds is a data visualization that shows the most commonly used words in a large text dataset where size is proportional to frequency; words with the highest count appear larger and in bold.  The ebook used in this example
+is "The Wonderful Wizard of Oz"
+
+\end{abstract}
+
+\textit{The Wonderful Wizard of Oz} was written by Frank Baum and published in 1900. It was the basis for the 1902 Broadway musical and the classic 1939 movie starring Judy Garland\footnote{https://en.wikipedia.org/wiki/The_Wonderful_Wizard_of_Oz.}. 
+
+\section{R Packages}
+
+The following packages were installed and brought in with library: dplyr, gutenbergr, stringr, tidytext, tm, wordcloud.
+
+The Gutenbergr Package is used to download the book text.  The Wonderful Wizard of Oz is ebook number 55 as identified in the book's bibrec tab on the Project Gutenberg website \citep{Silge}. but you can also search by title to determine a book number using: gutenberg_works(title=='enter title here').  Or, if you aren't sure of the title you can key word search using:  gutenberg_works(title==str_detect(title,'Frankenstein'))    
+
+The function below stores the result of the book text download in the dataframe "wizard". 
+
+<<>>=
+wizard<-gutenberg_download(55)
+@
+
+This dataframe has two columns, one for each line in the book.
+
+\noindent For this exercise, it is not necessary to exclude chapter headings and the first few pages of text; however, the procedures below will accomplish the task.  
+
+\section{How to Clean Data}
+
+
+<<>>=
+library(stringr)
+Wizard<-Wizard%>%
+  filter(!str_detect(wizard$text,'^CHAPTER'))
+@
+
+The actual text begins on line 10 and ends on 4721 so the wizard data frame can be redefined to exclude the first 9 lines. 
+
+<<>>=
+wizard<-wizard[10:4721,]
+@
+
+\section{The Wordcloud}
+To make the wordcloud, we first have to break up the lines into words.  We can use a function from the tidytext package for this:
+
+<<>>=
+library(tidytext)
+words_df<-wizard%>%
+  unnest_tokens(word,text)
+
+words_df
+@
+
+We can remove common, unimportant words with the stop\_words data frame and some dplyr:
+
+<<>>=
+words_df<-words_df%>%
+  filter(!(word %in% stop_words$word))
+
+words_df
+@
+
+Now, we need to calculate the frequencies of the words in the novel.  Again, we can use standard dplyr techniques for this:
+
+<<>>=
+word_freq<-words_df%>%
+  group_by(word)%>%
+  summarize(count=n())
+
+word_freq
+@
+
+Finally, it's time to generate the wordcloud:
+
+<<message=FALSE,warning=FALSE>>=
+library(wordcloud)
+library(tm)
+wordcloud(word_freq$word,word_freq$count,min.freq=20)
+@
+
+\bibliographystyle{apa}
+\bibliography{article,packages}
+\nocite{*}
+
+\end{document}
