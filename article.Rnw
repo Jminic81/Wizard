@@ -11,7 +11,7 @@ knitr::write_bib(packages,file='article.bib')
 
 
 
-\title{Using R to create a Wordcloud from text in an ebook}
+\title{Using R to create a wordcloud from text in an ebook}
 \author{Judy Minichelli}
 \maketitle
 
@@ -28,7 +28,7 @@ is "The Wonderful Wizard of Oz"
 
 The following packages were installed and brought in with library: dplyr, gutenbergr, stringr, tidytext, tm, wordcloud.
 
-The Gutenbergr Package is used to download the book text.  The Wonderful Wizard of Oz is ebook number 55 as identified in the book's bibrec tab on the Project Gutenberg website \citep{Silge}. but you can also search by title to determine a book number using: gutenberg_works(title=='enter title here').  Or, if you aren't sure of the title you can key word search using:  gutenberg_works(title==str_detect(title,'Frankenstein'))    
+The Gutenbergr Package is used to download the book text.  The Wonderful Wizard of Oz is ebook number 55 as identified in the book's bibrec tab on the Project Gutenberg website \citep{Gutenberg.org}. but you can also search by title to determine a book number using: gutenberg_works(title=='enter title here').  Or, if you aren't sure of the title you can key word search using:  gutenberg_works(title==str_detect(title,'Frankenstein'))    
 
 The function below stores the result of the book text download in the dataframe "wizard". 
 
@@ -41,7 +41,6 @@ This dataframe has two columns, one for each line in the book.
 \noindent For this exercise, it is not necessary to exclude chapter headings and the first few pages of text; however, the procedures below will accomplish the task.  
 
 \section{How to Clean Data}
-
 
 <<>>=
 library(stringr)
@@ -56,7 +55,7 @@ wizard<-wizard[10:4721,]
 @
 
 \section{The Wordcloud}
-To make the wordcloud, we first have to break up the lines into words.  We can use a function from the tidytext package for this:
+To make the wordcloud, break the text lines into words.
 
 <<>>=
 library(tidytext)
@@ -66,7 +65,7 @@ words_df<-wizard%>%
 words_df
 @
 
-We can remove common, unimportant words with the stop\_words data frame and some dplyr:
+Remove commonly used "generic" words from the data frame, for example articles, prepositions, and pronouns like "the", "after", and "you" from the data frame using the stop\_words command.
 
 <<>>=
 words_df<-words_df%>%
@@ -75,7 +74,7 @@ words_df<-words_df%>%
 words_df
 @
 
-Now, we need to calculate the frequencies of the words in the novel.  Again, we can use standard dplyr techniques for this:
+Calculate the frequencies of the remaining unique words.  
 
 <<>>=
 word_freq<-words_df%>%
@@ -85,16 +84,16 @@ word_freq<-words_df%>%
 word_freq
 @
 
-Finally, it's time to generate the wordcloud:
+Generate the wordcloud. If there are too many or too few words, adjust "n" in "min.freq=n" to change the minimum number of occurances required for the word to appear in the wordcloud.  The number of colors used in the graphic can be changed by adjusting "n" in "colors=brewer.pal(n,'Dark2').  This helps further differentiate  the words used with higher frequency.  
 
 <<message=FALSE,warning=FALSE>>=
 library(wordcloud)
 library(tm)
-wordcloud(word_freq$word,word_freq$count,min.freq=20)
+wordcloud(word_freq$word,word_freq$count,min.freq=20,colors=brewer.pal(4,'Dark2'))
 @
 
 \bibliographystyle{apa}
-\bibliography{article,packages}
+\bibliography{wiz}
 \nocite{*}
 
 \end{document}
