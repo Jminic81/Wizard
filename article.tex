@@ -69,24 +69,23 @@ is "The Wonderful Wizard of Oz"
 
 \end{abstract}
 
-\textit{The Wonderful Wizard of Oz} was written by Frank Baum and published in 1900. It was the basis for the 1902 Broadway musical and the classic 1939 movie starring Judy Garland\footnote{https://en.wikipedia.org/wiki/The_Wonderful_Wizard_of_Oz.}. 
+\textit{The Wonderful Wizard of Oz} was written by Frank Baum and published in 1900. It was the basis for the 1902 Broadway musical and the classic 1939 movie starring Judy Garland. 
 
 \section{R Packages}
 
 The following packages were installed and brought in with library: dplyr, gutenbergr, stringr, tidytext, tm, wordcloud.
 
-The Gutenbergr Package is used to download the book text.  The Wonderful Wizard of Oz is ebook number 55 as identified in the book's bibrec tab on the Project Gutenberg website \citep{Gutenberg.org}. but you can also search by title to determine a book number using: gutenberg_works(title=='enter title here').  Or, if you aren't sure of the title you can key word search using:  gutenberg_works(title==str_detect(title,'Frankenstein'))    
+    
 
 The function below stores the result of the book text download in the dataframe "wizard". 
 
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
+\hlkwd{library}\hlstd{(gutenbergr)}
 \hlstd{wizard}\hlkwb{<-}\hlkwd{gutenberg_download}\hlstd{(}\hlnum{55}\hlstd{)}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in gutenberg\_download(55): could not find function "{}gutenberg\_download"{}}}\end{kframe}
+\end{kframe}
 \end{knitrout}
 
 This dataframe has two columns, one for each line in the book.
@@ -103,12 +102,21 @@ This dataframe has two columns, one for each line in the book.
 
 
 {\ttfamily\noindent\color{warningcolor}{\#\# Warning: package 'stringr' was built under R version 3.4.2}}\begin{alltt}
-\hlstd{Wizard}\hlkwb{<-}\hlstd{Wizard}\hlopt{%>%}
-  \hlkwd{filter}\hlstd{(}\hlopt{!}\hlkwd{str_detect}\hlstd{(wizard}\hlopt{$}\hlstd{text,}\hlstr{'^CHAPTER'}\hlstd{))}
+\hlkwd{library}\hlstd{(dplyr)}
 \end{alltt}
 
 
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(lhs, parent, parent): object 'Wizard' not found}}\end{kframe}
+{\ttfamily\noindent\color{warningcolor}{\#\# Warning: package 'dplyr' was built under R version 3.4.2}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# \\\#\# Attaching package: 'dplyr'}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:stats':\\\#\# \\\#\#\ \ \ \  filter, lag}}
+
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# The following objects are masked from 'package:base':\\\#\# \\\#\#\ \ \ \  intersect, setdiff, setequal, union}}\begin{alltt}
+\hlstd{wizard}\hlkwb{<-}\hlstd{wizard}\hlopt{%>%}
+  \hlkwd{filter}\hlstd{(}\hlopt{!}\hlkwd{str_detect}\hlstd{(wizard}\hlopt{$}\hlstd{text,}\hlstr{'^CHAPTER'}\hlstd{))}
+\end{alltt}
+\end{kframe}
 \end{knitrout}
 
 The actual text begins on line 10 and ends on 4721 so the wizard data frame can be redefined to exclude the first 9 lines. 
@@ -118,9 +126,7 @@ The actual text begins on line 10 and ends on 4721 so the wizard data frame can 
 \begin{alltt}
 \hlstd{wizard}\hlkwb{<-}\hlstd{wizard[}\hlnum{10}\hlopt{:}\hlnum{4721}\hlstd{,]}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'wizard' not found}}\end{kframe}
+\end{kframe}
 \end{knitrout}
 
 \section{The Wordcloud}
@@ -130,21 +136,28 @@ To make the wordcloud, break the text lines into words.
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{library}\hlstd{(tidytext)}
-\end{alltt}
-
-
-{\ttfamily\noindent\color{warningcolor}{\#\# Warning: package 'tidytext' was built under R version 3.4.2}}\begin{alltt}
 \hlstd{words_df}\hlkwb{<-}\hlstd{wizard}\hlopt{%>%}
   \hlkwd{unnest_tokens}\hlstd{(word,text)}
-\end{alltt}
 
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(lhs, parent, parent): object 'wizard' not found}}\begin{alltt}
 \hlstd{words_df}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'words\_df' not found}}\end{kframe}
+\begin{verbatim}
+## # A tibble: 39,695 x 2
+##    gutenberg_id         word
+##           <int>        <chr>
+##  1           55     contents
+##  2           55 introduction
+##  3           55            1
+##  4           55          the
+##  5           55      cyclone
+##  6           55            2
+##  7           55          the
+##  8           55      council
+##  9           55         with
+## 10           55          the
+## # ... with 39,685 more rows
+\end{verbatim}
+\end{kframe}
 \end{knitrout}
 
 Remove commonly used "generic" words from the data frame, for example articles, prepositions, and pronouns like "the", "after", and "you" from the data frame using the stop\_words command.
@@ -154,15 +167,26 @@ Remove commonly used "generic" words from the data frame, for example articles, 
 \begin{alltt}
 \hlstd{words_df}\hlkwb{<-}\hlstd{words_df}\hlopt{%>%}
   \hlkwd{filter}\hlstd{(}\hlopt{!}\hlstd{(word} \hlopt{%in%} \hlstd{stop_words}\hlopt{$}\hlstd{word))}
-\end{alltt}
 
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(lhs, parent, parent): object 'words\_df' not found}}\begin{alltt}
 \hlstd{words_df}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'words\_df' not found}}\end{kframe}
+\begin{verbatim}
+## # A tibble: 12,304 x 2
+##    gutenberg_id         word
+##           <int>        <chr>
+##  1           55     contents
+##  2           55 introduction
+##  3           55            1
+##  4           55      cyclone
+##  5           55            2
+##  6           55      council
+##  7           55    munchkins
+##  8           55            3
+##  9           55      dorothy
+## 10           55        saved
+## # ... with 12,294 more rows
+\end{verbatim}
+\end{kframe}
 \end{knitrout}
 
 Calculate the frequencies of the remaining unique words.  
@@ -173,15 +197,26 @@ Calculate the frequencies of the remaining unique words.
 \hlstd{word_freq}\hlkwb{<-}\hlstd{words_df}\hlopt{%>%}
   \hlkwd{group_by}\hlstd{(word)}\hlopt{%>%}
   \hlkwd{summarize}\hlstd{(}\hlkwc{count}\hlstd{=}\hlkwd{n}\hlstd{())}
-\end{alltt}
 
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(lhs, parent, parent): object 'words\_df' not found}}\begin{alltt}
 \hlstd{word_freq}
 \end{alltt}
-
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in eval(expr, envir, enclos): object 'word\_freq' not found}}\end{kframe}
+\begin{verbatim}
+## # A tibble: 2,507 x 2
+##     word count
+##    <chr> <int>
+##  1     1     2
+##  2    10     2
+##  3    11     2
+##  4    12     2
+##  5    13     2
+##  6    14     2
+##  7    15     2
+##  8    16     2
+##  9    17     2
+## 10    18     2
+## # ... with 2,497 more rows
+\end{verbatim}
+\end{kframe}
 \end{knitrout}
 
 Generate the wordcloud. If there are too many or too few words, adjust "n" in "min.freq=n" to change the minimum number of occurances required for the word to appear in the wordcloud.  The number of colors used in the graphic can be changed by adjusting "n" in "colors=brewer.pal(n,'Dark2').  This helps further differentiate  the words used with higher frequency.  
@@ -193,9 +228,9 @@ Generate the wordcloud. If there are too many or too few words, adjust "n" in "m
 \hlkwd{library}\hlstd{(tm)}
 \hlkwd{wordcloud}\hlstd{(word_freq}\hlopt{$}\hlstd{word,word_freq}\hlopt{$}\hlstd{count,}\hlkwc{min.freq}\hlstd{=}\hlnum{20}\hlstd{,}\hlkwc{colors}\hlstd{=}\hlkwd{brewer.pal}\hlstd{(}\hlnum{4}\hlstd{,}\hlstr{'Dark2'}\hlstd{))}
 \end{alltt}
+\end{kframe}
+\includegraphics[width=\maxwidth]{figure/unnamed-chunk-8-1} 
 
-
-{\ttfamily\noindent\bfseries\color{errorcolor}{\#\# Error in wordcloud(word\_freq\$word, word\_freq\$count, min.freq = 20, colors = brewer.pal(4, : object 'word\_freq' not found}}\end{kframe}
 \end{knitrout}
 
 \bibliographystyle{apa}
