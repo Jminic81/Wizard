@@ -1,4 +1,0 @@
-The Gutenbergr Package is used to download the book text.  The Wonderful Wizard of Oz is ebook number 55 as identified in the book's bibrec tab on the Project Gutenberg website \citep{Gutenberg.org}. but you can also search by title to determine a book number using: gutenberg_works(title=='enter title here').  Or, if you aren't sure of the title you can key word search using:  gutenberg_works(title==str_detect(title,'Frankenstein'))
-
-
-\footnote{https://en.wikipedia.org/wiki/The_Wonderful_Wizard_of_Oz.}

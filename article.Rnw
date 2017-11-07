@@ -10,54 +10,54 @@ knitr::write_bib(packages,file='article.bib')
 \begin{document}
 
 
-
-\title{Using R to create a wordcloud from text in an ebook}
+\title{Using R to Create a Wordcloud from e-book Text}
 \author{Judy Minichelli}
 \maketitle
 
 \begin{abstract}
-The article gives instructions on how to download text from an ebook and create a 
-wordcloud in R.  A wordclouds is a data visualization that shows the most commonly used words in a large text dataset where size is proportional to frequency; words with the highest count appear larger and in bold.  The ebook used in this example
-is "The Wonderful Wizard of Oz"
+This article gives instructions on how to download text from an e-book and create a 
+wordcloud in R.  A wordcloud is a data visualization that shows the most commonly used words in a large text dataset where word size is proportional to frequency; words with the highest count appear larger and in bold.  
+
+Wordclouds have been used to summarize survey results and show most popular dog breeds in the US.  Certainly other text datasets can be quickly distilled down to a simple graphic (see example at end of article) to effectively communicate with an audience.  
+
+In this example, the text data set used to create a wordcloud was extracted from the e-book \textit{The Wonderful Wizard of Oz}\footnote{https://en.wikipedia.org/wiki/The_Wonderful_Wizard_of_Oz.}.  Written by Frank Baum and published in 1900, it was the basis for the 1902 Broadway musical and the 1939 classic movie starring Judy Garland.  
 
 \end{abstract}
 
-\textit{The Wonderful Wizard of Oz} was written by Frank Baum and published in 1900. It was the basis for the 1902 Broadway musical and the classic 1939 movie starring Judy Garland. 
+\section{Required Packages for R}
 
-\section{R Packages}
+The following packages were installed and brought in with library; dplyr, gutenbergr, stringr, tidytext, tm, and wordcloud.
 
-The following packages were installed and brought in with library: dplyr, gutenbergr, stringr, tidytext, tm, wordcloud.
+The gutenbergr package is used to download e-book text.  \textit{The Wonderful Wizard of Oz} is e-book number 55 as identified in the book's bibrec tab on the Project Gutenberg website. R can also be used to locate an e-book number by using:  gutenberg\_works(title\=='enter title here').  Or, if the exact title in not known, use a key word search:  gutenberg\_works(title\==str\_detect(title,'enter key word here')). 
 
-    
-
-The function below stores the result of the book text download in the dataframe "wizard". 
+The code below stores the result of the book text download in the data frame "wizard". 
 
 <<message=FALSE,warning=FALSE>>=
 library(gutenbergr)
 wizard<-gutenberg_download(55)
 @
 
-This dataframe has two columns, one for each line in the book.
+The "wizard" data frame contains two columns; the line reference number and the corresponding text from the book.  
 
-\noindent For this exercise, it is not necessary to exclude chapter headings and the first few pages of text; however, the procedures below will accomplish the task.  
+\section{How to Clean the Data}
 
-\section{How to Clean Data}
+\noindent For this exercise, it is not necessary to exclude chapter headings and the first few pages of text that are not part of the story; however, the procedure below accomplishes the task.  First, the stringr string detect command filters out chapter headings.     
 
-<<>>=
+<<message=FALSE,warning=FALSE>>=
 library(stringr)
 library(dplyr)
 wizard<-wizard%>%
   filter(!str_detect(wizard$text,'^CHAPTER'))
 @
 
-The actual text begins on line 10 and ends on 4721 so the wizard data frame can be redefined to exclude the first 9 lines. 
+Then the wizard data frame is redefined to exclude the pre-story text lines. 
 
 <<message=FALSE,warning=FALSE>>=
-wizard<-wizard[10:4721,]
+wizard<-wizard[36:4721,]
 @
 
-\section{The Wordcloud}
-To make the wordcloud, break the text lines into words.
+\section{Creating the Wordcloud}
+To make the wordcloud, first read the wizard data frame into the words\_df data frame and then use the unnest\_tokens comand to break the text lines into individual words.
 
 <<message=FALSE,warning=FALSE>>=
 library(tidytext)
@@ -67,9 +67,9 @@ words_df<-wizard%>%
 words_df
 @
 
-Remove commonly used "generic" words from the data frame, for example articles, prepositions, and pronouns like "the", "after", and "you" from the data frame using the stop\_words command.
+Filter out commonly used "generic" words from the data frame like articles, prepositions, and pronouns, for example "the", "after", and "you" using the stop\_words command.
 
-<<>>=
+<<message=FALSE,warning=FALSE>>=
 words_df<-words_df%>%
   filter(!(word %in% stop_words$word))
 
@@ -86,13 +86,23 @@ word_freq<-words_df%>%
 word_freq
 @
 
-Generate the wordcloud. If there are too many or too few words, adjust "n" in "min.freq=n" to change the minimum number of occurances required for the word to appear in the wordcloud.  The number of colors used in the graphic can be changed by adjusting "n" in "colors=brewer.pal(n,'Dark2').  This helps further differentiate  the words used with higher frequency.  
+Generate the wordcloud. If there are too many or too few words, adjust "n" in "min.freq=n" to change the minimum number of occurrences required for the word to appear in the wordcloud.  The number of colors used in the graphic can be changed by adjusting "n" in "colors=brewer.pal(n,'Dark2').  
+
+Additionally, a different color scheme may be selected by changing "Dark 2" to another R Color Palette; a Google search will yield a variety of references and "cheat sheets" to help select an alternate\footnote{https://www.nceas.ucsb.edu/~frazier/RSpatialGuides/colorPaletteCheatsheet.pdf}.  
+
+Although black and white is striking, using a few different colors helps further differentiate the words used with higher frequency and makes the graphic more appealing.  
 
 <<message=FALSE,warning=FALSE>>=
 library(wordcloud)
 library(tm)
-wordcloud(word_freq$word,word_freq$count,min.freq=20,colors=brewer.pal(4,'Dark2'))
+wordcloud(word_freq$word,word_freq$count,min.freq=25,colors=brewer.pal(4,'Dark2'))
 @
+
+\section{Results and Conclusion}
+
+Each time the wordcloud is generated, the words change position and orientation but word size remains constant as it is dependent on frequency which does not change.  
+
+Being the main character, of course Dorothy has top-billing.  And it follows that characters Scarecrow and (Tin) Woodman would be tied for second, Oz and Lion third, and then Witch and Toto fourth.  The ever fabulous munchkins barely made mention and are still protesting.
 
 \bibliographystyle{apa}
 \bibliography{article,wiz}
